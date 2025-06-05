@@ -20,8 +20,15 @@ workflows:
           npx cap sync ios
       - name: Build iOS project
         script: |
-          cd ios
-          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos -archivePath $HOME/build/App.xcarchive archive
-          xcodebuild -exportArchive -archivePath $HOME/build/App.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $HOME/build/ipa
+          cd ios/App
+          
+          # Чистим предыдущие билды (замени YourSchemeName на App)
+          xcodebuild clean -workspace App.xcworkspace -scheme App -configuration Release
+          
+          # Архивируем проект (собираем .xcarchive)
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos archive -archivePath $HOME/build/App.xcarchive CODE_SIGN_STYLE=Automatic
+          
+          # Экспортируем .ipa, путь к ExportOptions.plist указать относительно папки ios/App, т.е. ../ExportOptions.plist
+          xcodebuild -exportArchive -archivePath $HOME/build/App.xcarchive -exportOptionsPlist ../ExportOptions.plist -exportPath $HOME/build/ipa
     artifacts:
       - build/ipa/*.ipa
