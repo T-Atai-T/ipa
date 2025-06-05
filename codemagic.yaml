@@ -1,0 +1,27 @@
+workflows:
+  ios-webview-build:
+    name: Build iOS WebView App
+    environment:
+      vars:
+        BUNDLE_ID: "com.bckg.ios"
+      xcode: latest
+    triggering:
+      events:
+        - push
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+      - name: Build the React app
+        script: |
+          npm run build
+      - name: Sync with Capacitor
+        script: |
+          npx cap sync ios
+      - name: Build iOS project
+        script: |
+          cd ios
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos -archivePath $HOME/build/App.xcarchive archive
+          xcodebuild -exportArchive -archivePath $HOME/build/App.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $HOME/build/ipa
+    artifacts:
+      - build/ipa/*.ipa
